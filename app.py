@@ -1,5 +1,6 @@
 from flask import Flask
 from flask_restful import Resource, Api
+import writer
 
 app = Flask(__name__)
 api = Api(app)
@@ -17,11 +18,13 @@ class HelloWorld(Resource):
 #         return {'hello': 'world'}
 
 class encodeFile(Resource):
-    def post(self,message,file):
+    def post(self,message,filepath):
+        writer.openAndHide(message,filepath)
         return {'hello': 'world'}
 
 class decodeFile(Resource):
     def post(self,file):
+        writer.openAndReveal(filepath)
         return {'hello': 'world'}
 
 
