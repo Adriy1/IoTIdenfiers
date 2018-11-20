@@ -3,8 +3,7 @@
 # app = Flask(__name__)
 # api = Api(app)
 #
-# class HelloWorld(Resource):
-#     def get(self):
+# class HelloWorld(Resource):#     def get(self):
 #         return {'hello': 'world'}
 #
 # # class getFile(Resource):
