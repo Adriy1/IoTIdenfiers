@@ -30,6 +30,7 @@ def upload_file():
             return redirect(request.url)
         file = request.files['file']
         identifier = request.form['id']
+        outputfilename = request.form['filename']
         # if user does not select file, browser also
         # submit an empty part without filename
         if file.filename == '':
@@ -42,8 +43,8 @@ def upload_file():
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             writer.openAndHide(os.path.join(app.config['UPLOAD_FOLDER'], filename),
                                identifier,
-                               "output.png")
-            writer.openAndReveal("output.png")
+                               outputfilename)
+            writer.openAndReveal(outputfilename)
             return redirect(url_for('upload_file'))
 
     return '''
@@ -52,7 +53,10 @@ def upload_file():
     <h1>Upload new File</h1>
     <form method=post enctype=multipart/form-data>
       <input type=file name=file>
+      identifier
       <input type=text name=id>
+      output file name
+      <input type=text name=filename>
       <input type=submit value=Upload>
     </form>
     '''
