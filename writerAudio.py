@@ -32,6 +32,7 @@ def openAndHideAudio(filepath,identifier,output):
     print("MESSAGE HIDDEN")
 
 def openAndRevealAudio(filepath):
+    decoded = ""
     song = wave.open(filepath, mode='rb')
     # Convert audio to byte array
     frame_bytes = bytearray(list(song.readframes(song.getnframes())))
@@ -62,7 +63,7 @@ def openAndRevealAudio(filepath):
         # Print the extracted text
         print("Sucessfully decoded: "+decoded)
     song.close()
-
+    return decoded
 
 
 def main():

@@ -3,10 +3,11 @@ import writer
 import writerAudio
 import pathlib
 
-from flask import Flask, flash, request, redirect, url_for
+from flask import Flask, flash, request, redirect, url_for,send_from_directory
 from werkzeug import secure_filename
 
 UPLOAD_FOLDER = 'uploads'
+OUTPUT_FOLDER = 'outputs'
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg','gif','wav'])
 
 app = Flask(__name__)
@@ -40,21 +41,20 @@ def upload_file():
         if file and allowed_file(file.filename):
             if not os.path.isdir(UPLOAD_FOLDER):
                 pathlib.Path(UPLOAD_FOLDER).mkdir(parents=True, exist_ok=True)
+            if not os.path.isdir(OUTPUT_FOLDER):
+                pathlib.Path(OUTPUT_FOLDER).mkdir(parents=True, exist_ok=True)
             filename = secure_filename(file.filename)
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             ext = file.filename.rsplit(".")[-1].lower()
-            print(ext)
             if (ext == "wav"):
                 writerAudio.openAndHideAudio(os.path.join(app.config['UPLOAD_FOLDER'], filename),
                                    identifier,
-                                   outputfilename)
-                writerAudio.openAndRevealAudio(outputfilename)
+                                   'outputs/'+outputfilename)
             else:
                 writer.openAndHide(os.path.join(app.config['UPLOAD_FOLDER'], filename),
                                    identifier,
-                                   outputfilename)
-                writer.openAndReveal(outputfilename)
-            return redirect(url_for('upload_file'))
+                                   'outputs/'+outputfilename)
+            return redirect('outputs/'+outputfilename)
 
     return '''
     <!doctype html>
@@ -69,6 +69,44 @@ def upload_file():
       <input type=submit value=Upload>
     </form>
     '''
+
+
+@app.route('/outputs/<filename>', methods=['GET'])
+def return_file(filename):
+    return send_from_directory(directory='outputs', filename=filename, as_attachment=True)
+
+
+@app.route('/decode',methods=['GET','POST'])
+def decodeFile():
+    if request.method == 'POST':
+        # check if the post request has the file part
+        if 'file' not in request.files:
+            # flash('No file part')
+            return redirect(request.url)
+        file = request.files['file']
+        if file.filename == '':
+            # flash('No selected file')
+            return redirect(request.url)
+        filename = secure_filename(file.filename)
+        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        ext = file.filename.rsplit(".")[-1].lower()
+        if (ext == "wav"):
+            data = str(writerAudio.openAndRevealAudio('uploads/'+filename))
+        else:
+            data = str(writer.openAndReveal('uploads/'+filename))
+        return data
+    return '''
+    <!doctype html>
+    <title>Decode new File</title>
+    <h1>Decode new File</h1>
+    <form method=post enctype=multipart/form-data>
+      <input type=file name=file>
+      <input type=submit value=Decode>
+    </form>
+    '''
+
+
+
 
 if __name__ == "__main__":
     app.run(debug=True)
