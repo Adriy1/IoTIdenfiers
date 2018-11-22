@@ -47,7 +47,6 @@ def openAndRevealAudio(filepath):
         while(c<3 and i<l-8):
             extracted = [frame_bytes[j] & 1 for j in range(i,i+8)]
             string += "".join(chr(int("".join(map(str,extracted)),2)))
-            print(string)
             if (string[-1]=="#"):
                 c += 1
             else:

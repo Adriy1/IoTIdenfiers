@@ -1,12 +1,13 @@
 import os
 import writer
+import writerAudio
 import pathlib
 
 from flask import Flask, flash, request, redirect, url_for
 from werkzeug import secure_filename
 
 UPLOAD_FOLDER = 'uploads'
-ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg','gif'])
+ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg','gif','wav'])
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -41,10 +42,18 @@ def upload_file():
                 pathlib.Path(UPLOAD_FOLDER).mkdir(parents=True, exist_ok=True)
             filename = secure_filename(file.filename)
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            writer.openAndHide(os.path.join(app.config['UPLOAD_FOLDER'], filename),
-                               identifier,
-                               outputfilename)
-            writer.openAndReveal(outputfilename)
+            ext = file.filename.rsplit(".")[-1].lower()
+            print(ext)
+            if (ext == "wav"):
+                writerAudio.openAndHideAudio(os.path.join(app.config['UPLOAD_FOLDER'], filename),
+                                   identifier,
+                                   outputfilename)
+                writerAudio.openAndRevealAudio(outputfilename)
+            else:
+                writer.openAndHide(os.path.join(app.config['UPLOAD_FOLDER'], filename),
+                                   identifier,
+                                   outputfilename)
+                writer.openAndReveal(outputfilename)
             return redirect(url_for('upload_file'))
 
     return '''
