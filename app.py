@@ -4,7 +4,7 @@ import writerAudio
 import pathlib
 import shutil
 
-from flask import Flask, flash, request, redirect, url_for,send_from_directory
+from flask import Flask, flash, request, redirect, url_for,send_from_directory,after_this_request
 from werkzeug import secure_filename
 
 UPLOAD_FOLDER = 'uploads'
@@ -26,10 +26,6 @@ def hello():
 
 @app.route('/upload', methods=['GET', 'POST'])
 def upload_file():
-    try:
-        os.system('rm outputs/*')
-    except:
-        pass
     if request.method == 'POST':
         # check if the post request has the file part
         if 'file' not in request.files:
@@ -79,6 +75,18 @@ def upload_file():
 
 @app.route('/outputs/<filename>', methods=['GET'])
 def return_file(filename):
+
+    file_handle = open('outputs/'+filename, 'r')
+
+    @after_this_request
+    def remove_file(response):
+        try:
+            os.remove('outputs/'+filename)
+            file_handle.close()
+        except Exception as error:
+            app.logger.error("Error removing or closing downloaded file handle", error)
+        return response
+
     return send_from_directory(directory='outputs', filename=filename, as_attachment=True)
 
 
