@@ -3,11 +3,11 @@
 import argparse
 from stegano import lsb
 
-def openAndHide(self, filepath, identifier):
+def openAndHide(filepath, identifier, output):
     secret = lsb.hide(filepath, identifier)
-    secret.save(self.output)
+    secret.save(output)
 
-def openAndReveal(self, filepath):
+def openAndReveal(filepath):
     clearMessage = lsb.reveal(filepath)
     print(clearMessage)
     return (clearMessage)
@@ -19,8 +19,7 @@ def openAndReveal(self, filepath):
 #     parser.add_argument('output', metavar='o',
 #                         help='outpute filename')
 #     args = parser.parse_args()
-#     objWrite = writer(args.file, args.output)
-#     objWrite.openAndReveal()
-#
+#     openAndHide(args.file, "BONJOUR", "./output.png")
+#     openAndReveal("./output.mp3")
 # if __name__ == "__main__":
 #     main()

@@ -1,5 +1,6 @@
 import os
 import writer
+import pathlib
 
 from flask import Flask, flash, request, redirect, url_for
 from werkzeug import secure_filename
@@ -28,22 +29,30 @@ def upload_file():
             # flash('No file part')
             return redirect(request.url)
         file = request.files['file']
+        identifier = request.form['id']
         # if user does not select file, browser also
         # submit an empty part without filename
         if file.filename == '':
             # flash('No selected file')
             return redirect(request.url)
         if file and allowed_file(file.filename):
+            if not os.path.isdir(UPLOAD_FOLDER):
+                pathlib.Path(UPLOAD_FOLDER).mkdir(parents=True, exist_ok=True)
             filename = secure_filename(file.filename)
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            return redirect(url_for('upload_file',
-                                    filename=filename))
+            writer.openAndHide(os.path.join(app.config['UPLOAD_FOLDER'], filename),
+                               identifier,
+                               "output.png")
+            writer.openAndReveal("output.png")
+            return redirect(url_for('upload_file'))
+
     return '''
     <!doctype html>
     <title>Upload new File</title>
     <h1>Upload new File</h1>
     <form method=post enctype=multipart/form-data>
       <input type=file name=file>
+      <input type=text name=id>
       <input type=submit value=Upload>
     </form>
     '''
