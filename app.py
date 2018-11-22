@@ -2,6 +2,7 @@ import os
 import writer
 import writerAudio
 import pathlib
+import shutil
 
 from flask import Flask, flash, request, redirect, url_for,send_from_directory
 from werkzeug import secure_filename
@@ -25,6 +26,10 @@ def hello():
 
 @app.route('/upload', methods=['GET', 'POST'])
 def upload_file():
+    try:
+        os.system('rm outputs/*')
+    except:
+        pass
     if request.method == 'POST':
         # check if the post request has the file part
         if 'file' not in request.files:
@@ -54,6 +59,7 @@ def upload_file():
                 writer.openAndHide(os.path.join(app.config['UPLOAD_FOLDER'], filename),
                                    identifier,
                                    'outputs/'+outputfilename)
+            os.remove(os.path.join(app.config['UPLOAD_FOLDER'],filename))
             return redirect('outputs/'+outputfilename)
 
     return '''
@@ -94,6 +100,7 @@ def decodeFile():
             data = str(writerAudio.openAndRevealAudio('uploads/'+filename))
         else:
             data = str(writer.openAndReveal('uploads/'+filename))
+        os.remove(os.path.join(app.config['UPLOAD_FOLDER'],filename))
         return data
     return '''
     <!doctype html>
