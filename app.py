@@ -3,16 +3,35 @@ import writer
 import writerAudio
 import pathlib
 import shutil
+import sqlite3
 
-from flask import Flask, flash, request, redirect, url_for,send_from_directory,after_this_request
+from datetime import datetime
+from flask_cors import CORS
+from flask import Flask, flash, request, redirect, url_for,send_from_directory,after_this_request, g
 from werkzeug import secure_filename
 
+DATABASE = './iotIdentifier.db'
 UPLOAD_FOLDER = 'uploads'
 OUTPUT_FOLDER = 'outputs'
 ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg','gif','wav'])
 
 app = Flask(__name__)
+CORS(app)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+# database connections
+
+def get_db():
+    db = getattr(g, '_database', None)
+    if db is None:
+        db = g._database = sqlite3.connect(DATABASE)
+    return db
+
+@app.teardown_appcontext
+def close_connection(exception):
+    db = getattr(g, '_database', None)
+    if db is not None:
+        db.close()
 
 def allowed_file(filename):
     return '.' in filename and \
@@ -47,14 +66,19 @@ def upload_file():
             filename = secure_filename(file.filename)
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             ext = file.filename.rsplit(".")[-1].lower()
+            cur = get_db().cursor()
             if (ext == "wav"):
                 writerAudio.openAndHideAudio(os.path.join(app.config['UPLOAD_FOLDER'], filename),
                                    identifier,
                                    'outputs/'+outputfilename)
+                cur.execute("INSERT INTO File VALUES('Audio', '{}', '{}', '{}');".format(identifier, filename, str(datetime.now())))
+
             else:
                 writer.openAndHide(os.path.join(app.config['UPLOAD_FOLDER'], filename),
                                    identifier,
                                    'outputs/'+outputfilename)
+                cur.execute("INSERT INTO File VALUES('Image', '{}', '{}', '{}');".format(identifier, filename, str(datetime.now())))
+            get_db().commit()
             os.remove(os.path.join(app.config['UPLOAD_FOLDER'],filename))
             return redirect('outputs/'+outputfilename)
 
