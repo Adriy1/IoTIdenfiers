@@ -1,33 +1,26 @@
-#Plan IoT
+# IoTIdentifiers
 
-1. Write
-2. Read
-3. DB
-4. Api
-## 1. Write
+![screenshot](https://screenshotscdn.firefoxusercontent.com/images/78435ce9-791b-4138-b5ac-be2a4d802d7a.png)
 
-encode in a file Author + Number(date?) + hash
+## Goal
+Store a identifier inside an image or an audio file to fight against piracy
 
-steganography / header
+## Backend
+Python flask api: 2 endpoints
+- encode
+- decode
 
-write file in DB
+`python3 app.py`
 
-## 2. Read
+## Front end
+Web app en Vue.js
+`yarn serve` ou `npm run serve`
 
-find the metadata in the file
+Then visit `localhost:8080`
 
-check if in DB
+## DB
+SQLite
 
-## 3. DB
-use firebase
-
-## 4. API REST
-
-- POST /encode (image, author)
-- POST /decode (image)
-- GET /images
-- GET /image/[hash]
-- 
 
  
 
